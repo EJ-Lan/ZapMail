@@ -6,11 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
 
-  // Listen for sent emails
-  document.querySelector('#compose-form').onsubmit = send_email;
-
   // By default, load the inbox
   load_mailbox('inbox');
+
+   // Listen for sent emails
+   document.querySelector('#compose-form').onsubmit = send_email;
 });
 
 const compose_email = () => {
@@ -33,15 +33,45 @@ const load_mailbox = (mailbox) => {
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+  // Get request for the emails
+  fetch(`/emails/${mailbox}`)
+  .then(response => response.json())
+  .then(emails => {
+    
+    // Loop over emails object
+    emails.forEach(email => {
+      // Create new email div with info needed
+      const emailDiv = document.createElement('div');
+      emailDiv.className = 'email list-group-item list-group-item-action flex-column align-items-start';
+      emailDiv.innerHTML = `
+      <div class="d-flex w-100 justify-content-between">
+        <h5 class="mb-1">From: ${email.sender}</h5>
+        <small>${email.timestamp}</small>
+      </div>
+      <p class="mb-1">Subject: ${email.subject}</p>
+    `;
+
+      // Change background based on if email is read
+      if (email.read) {
+        emailDiv.classList.add('list-group-item-secondary'); // Bootstrap class for grey background
+      }
+
+      // Append the emailDiv to the emails-view
+      document.querySelector('#emails-view').appendChild(emailDiv);
+    });
+  });
 }
 
 const send_email = () => {
 
+  // Get email data
   const compose_recipients = document.querySelector('#compose-recipients').value;
   const compose_subject = document.querySelector('#compose-subject').value;
   const compose_body = document.querySelector('#compose-body').value;
 
-  fetch('/emails', {
+  // Post request for sending email
+  fetch(`/emails`, {
     method: 'POST',
     body: JSON.stringify({
       recipients: compose_recipients,
@@ -51,6 +81,8 @@ const send_email = () => {
   })
   .then(response => response.json())
   .then(result => {
+
+    // load the sent mailbox
     load_mailbox('sent');
   })
 
