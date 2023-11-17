@@ -130,6 +130,15 @@ const view_email = (id, mailbox) => {
     const archiveButton = document.createElement('button');
     archiveButton.className = 'btn btn-primary btn-sm';
 
+    // Create and append the reply button
+    const replyButton = document.createElement('button');
+    replyButton.className = 'btn btn-sm btn-primary mr-2'; // Use Bootstrap's outline-primary for styling
+    replyButton.textContent = 'Reply';
+    replyButton.addEventListener('click', () => reply_to_email(email));
+    
+    // Append the reply button to the buttonDiv before the archive button
+    buttonDiv.insertBefore(replyButton, buttonDiv.firstChild); // Insert it as the first child
+
     if (mailbox === 'inbox') {
       archiveButton.textContent = 'Archive';
       archiveButton.onclick = () => update_archive_status(id, true);
@@ -153,6 +162,22 @@ const view_email = (id, mailbox) => {
       body: JSON.stringify({ read: true })
     });
   });
+}
+
+const reply_to_email = (originalEmail) => {
+  // Show compose view and hide other views
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
+  const composeView = document.querySelector('#compose-view');
+  composeView.style.display = 'block';
+
+  // Pre-fill the composition form
+  document.querySelector('#compose-recipients').value = originalEmail.sender;
+  // Check if subject begins with 'Re:'
+  const rePrefix = originalEmail.subject.startsWith('Re:') ? '' : 'Re: ';
+  document.querySelector('#compose-subject').value = `${rePrefix}${originalEmail.subject}`;
+  // Pre-fill the body with the original email's details
+  document.querySelector('#compose-body').value = `On ${originalEmail.timestamp} ${originalEmail.sender} wrote:\n${originalEmail.body}\n\n`;
 }
 
 const update_archive_status = (id, status) => {
