@@ -17,6 +17,7 @@ const compose_email = () => {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
@@ -30,6 +31,7 @@ const load_mailbox = (mailbox) => {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
@@ -56,6 +58,9 @@ const load_mailbox = (mailbox) => {
       if (email.read) {
         emailDiv.classList.add('list-group-item-secondary'); // Bootstrap class for grey background
       }
+
+      // If email is clicked
+      emailDiv.addEventListener('click', () => view_email(email.id, mailbox));
 
       // Append the emailDiv to the emails-view
       document.querySelector('#emails-view').appendChild(emailDiv);
@@ -87,4 +92,35 @@ const send_email = () => {
   })
 
   return false
+}
+
+const view_email = (id, mailbox) => {
+  document.querySelector('#email-view').style.display = 'block';
+  document.querySelector('#emails-view').style.display = 'none';
+
+  fetch(`/emails/${id}`)
+  .then(response => response.json())
+  .then(email => {
+    const emailView = document.querySelector('#email-view');
+    emailView.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <strong>From:</strong> ${email.sender}
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">
+        <strong>Subject:</strong> ${email.subject}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">${email.timestamp}</h6>
+        <p class="card-text">${email.body}</p>
+      </div>
+    </div>
+  `;
+
+    fetch(`/emails/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        read: true
+      })
+    });
+  });
 }
