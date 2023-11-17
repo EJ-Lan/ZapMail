@@ -19,3 +19,18 @@ textarea {
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
+
+  #archive-button {
+    padding: 0.5rem 1rem; /* Standard padding */
+    margin-top: 1rem; /* Space from the email body */
+    background-color: #007bff; /* A shade of blue that stands out */
+    color: white; /* White text to contrast the button background */
+    border: none; /* Remove default border */
+    border-radius: 0.25rem; /* Rounded corners */
+    cursor: pointer; /* Cursor indicates it's clickable */
+    transition: background-color 0.2s; /* Smooth transition for hover effect */
+  }
+  
+  #archive-button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+  }

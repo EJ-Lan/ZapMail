@@ -95,15 +95,24 @@ const send_email = () => {
 }
 
 const view_email = (id, mailbox) => {
-  document.querySelector('#email-view').style.display = 'block';
+  // Show email view and hide other views
+  const emailView = document.querySelector('#email-view');
+  emailView.style.display = 'block';
   document.querySelector('#emails-view').style.display = 'none';
 
+  // Clear previous email content
+  emailView.innerHTML = '';
+
+  // Fetch the specific email
   fetch(`/emails/${id}`)
   .then(response => response.json())
   .then(email => {
-    const emailView = document.querySelector('#email-view');
-    emailView.innerHTML = `
-    <div class="card">
+    // Create the email card
+    const emailCard = document.createElement('div');
+    emailCard.className = 'card';
+
+    // Construct card content
+    emailCard.innerHTML = `
       <div class="card-header">
         <strong>From:</strong> ${email.sender}
       </div>
@@ -113,14 +122,49 @@ const view_email = (id, mailbox) => {
         <h6 class="card-subtitle mb-2 text-muted">${email.timestamp}</h6>
         <p class="card-text">${email.body}</p>
       </div>
-    </div>
-  `;
+    `;
 
+    // Create and append the archive/unarchive button
+    const buttonDiv = document.createElement('div');
+    buttonDiv.className = 'card-footer text-muted';
+    const archiveButton = document.createElement('button');
+    archiveButton.className = 'btn btn-primary btn-sm';
+
+    if (mailbox === 'inbox') {
+      archiveButton.textContent = 'Archive';
+      archiveButton.onclick = () => update_archive_status(id, true);
+    } else if (mailbox === 'archive') {
+      archiveButton.textContent = 'Unarchive';
+      archiveButton.onclick = () => update_archive_status(id, false);
+    }
+
+    // Only add the button if we're in the inbox or archive
+    if (mailbox === 'inbox' || mailbox === 'archive') {
+      buttonDiv.appendChild(archiveButton);
+      emailCard.appendChild(buttonDiv);
+    }
+
+    // Append the card to the email view
+    emailView.appendChild(emailCard);
+
+    // Mark email as read
     fetch(`/emails/${id}`, {
       method: 'PUT',
-      body: JSON.stringify({
-        read: true
-      })
+      body: JSON.stringify({ read: true })
     });
+  });
+}
+
+const update_archive_status = (id, status) => {
+  // Make PUT request to update the archive status of the email
+  fetch(`/emails/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ archived: status })
+  })
+  .then(response => {
+    // If the response is ok, reload the inbox
+    if(response.ok) {
+      load_mailbox('inbox');
+    }
   });
 }
