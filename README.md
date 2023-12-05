@@ -32,3 +32,5 @@ To get started with ZapMail, follow these steps:
 
    ```bash
    python manage.py runserver
+
+3. Open your browser and navigate to the address provided by the Django server (usually http://127.0.0.1:8000/).
