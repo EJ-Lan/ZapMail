@@ -29,5 +29,6 @@ To get started with ZapMail, follow these steps:
    pip install -r requirements.txt
 
 2. **Run the Django Server:**
-  ```bash
-  python manage.py runserver
+
+   ```bash
+   python manage.py runserver
